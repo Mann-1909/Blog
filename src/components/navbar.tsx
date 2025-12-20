@@ -7,8 +7,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 
-// HARDCODE YOUR ADMIN EMAIL HERE FOR THE UI CHECK
-const ADMIN_EMAIL = "saxena.mann2005@gmail.com";
+// // HARDCODE YOUR ADMIN EMAIL HERE FOR THE UI CHECK
+// const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || ;
 
 export default function Navbar() {
   const { theme, setTheme } = useTheme();
@@ -39,7 +39,7 @@ export default function Navbar() {
   if (!mounted) return null;
 
   // Check if current user is the admin
-  const isAdmin = user?.email === ADMIN_EMAIL;
+  const isAdmin = user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
   return (
     <nav className="w-full border-b border-slate-200 dark:border-slate-800 py-4 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md sticky top-0 z-50">

@@ -48,7 +48,7 @@ export default function Navbar() {
           href="/"
           className="font-bold text-xl tracking-tight text-slate-900 dark:text-white"
         >
-          DevBlog
+          {process.env.NEXT_PUBLIC_WEBSITE_TITLE}
         </Link>
 
         <div className="flex items-center gap-4">

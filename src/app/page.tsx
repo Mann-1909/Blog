@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabase"; // Import the client
 import Navbar from "@/components/navbar";
 import Link from "next/link";
 import PostList from "@/components/postList"
+import Typewriter2 from "@/components/typewriter/typewriter2";
 // 1. Remove the old Dummy Data array
 // 2. Add this specific instruction to stop Next.js from caching old data forever
 export const revalidate = 0; 
@@ -18,16 +19,17 @@ export default async function Home() {
     <main className="min-h-screen bg-white dark:bg-slate-950">
       <Navbar />
 
-      <div className="container mx-auto px-4 max-w-3xl py-12">
+      <div className="container mx-auto px-4 max-w-4xl py-12">
         {/* Hero Section (Keep this the same) */}
         <section className="mb-16 space-y-4">
           <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl text-slate-900 dark:text-white">
-            Hi, I'm Mann.
+            Welcome to My Blogs!🙏
           </h1>
-          <p className="text-xl text-slate-600 dark:text-slate-400 leading-relaxed">
-            I write about React, Flutter, and building digital products. 
-            Welcome to my digital garden.
-          </p>
+          <Typewriter2 
+            text="Read more about my journey, the experiences that shape me, and the new things I learn every day.
+                  Step inside my digital garden." 
+            style="text-xl text-slate-600 dark:text-slate-400 leading-relaxed"
+          />
         </section>
 
         <div className="w-full h-px bg-slate-200 dark:bg-slate-800 mb-12"></div>

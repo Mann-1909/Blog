@@ -43,7 +43,7 @@ export default function Navbar() {
 
   return (
     <nav className="w-full border-b border-slate-200 dark:border-slate-800 py-4 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md sticky top-0 z-50">
-      <div className="container mx-auto px-4 max-w-3xl flex justify-between items-center">
+      <div className="container mx-auto px-4 max-w-4xl flex justify-between items-center">
         <Link
           href="/"
           className="font-bold text-xl tracking-tight text-slate-900 dark:text-white"

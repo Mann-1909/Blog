@@ -7,8 +7,8 @@ import { Providers } from "./providers"; // Import the file we just made
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "My Tech Blog",
-  description: "Writing about Flutter, React, and Tech.",
+  title: process.env.NEXT_PUBLIC_WEBSITE_TITLE,
+  description: "Blogs",
 };
 
 export default function RootLayout({

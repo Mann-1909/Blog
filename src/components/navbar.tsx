@@ -51,21 +51,24 @@ export default function Navbar() {
           {process.env.NEXT_PUBLIC_WEBSITE_TITLE}
         </Link>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           {/* CONDITIONALLY RENDER DASHBOARD LINK */}
           {isAdmin && (
             <Link
               href="/admin/dashboard"
-              className="hidden sm:flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              // OLD: className="hidden sm:flex items-center..."
+              className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
             >
               <LayoutDashboard size={18} />
-              <span>Dashboard</span>
+              {/* Optional: Hide just the TEXT on super small phones, keep icon */}
+              <span className="hidden sm:inline">Dashboard</span>
             </Link>
           )}
 
           <Link
             href="/about"
-            className="hidden sm:block text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            // OLD: className="hidden sm:block text-sm..."
+            className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
           >
             About
           </Link>

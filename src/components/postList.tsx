@@ -28,7 +28,7 @@ export default function PostList({ posts }: { posts: any[] }) {
       className="space-y-10"
     >
       {posts.map((post) => (
-        <motion.article key={post.id} variants={item} className="group">
+        <motion.article key={post.id} variants={item} className="group" whileHover={{ scale: 1.01 }} transition={{ type: "spring", stiffness: 100 }}>
           <Link href={`/blog/${post.slug}`} className="block">
               <div className="flex items-center gap-3 text-sm text-slate-500 mb-2">
                   <span>{new Date(post.created_at).toLocaleDateString()}</span>

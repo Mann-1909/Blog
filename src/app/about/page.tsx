@@ -2,7 +2,7 @@
 
 import Navbar from "@/components/navbar";
 import { motion } from "framer-motion";
-import { Code2, Dumbbell, BookOpen, MapPin, Github, Twitter, Linkedin, Mail } from "lucide-react";
+import { Code2, Dumbbell, BookOpen, MapPin, Github, Twitter, Linkedin, Mail, Link, ArrowLeft } from "lucide-react";
 
 export default function About() {
   const fadeInUp = {
@@ -17,9 +17,8 @@ export default function About() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <Navbar />
-
-      <main className="container mx-auto px-4 max-w-4xl py-12 md:py-20">
         
+      <main className="container mx-auto px-4 max-w-4xl py-12 md:py-20">
         {/* HERO SECTION */}
         <motion.section 
           initial="hidden" 
@@ -127,7 +126,7 @@ export default function About() {
             
             <div className="flex justify-center gap-6">
                 <a 
-                  href="https://github.com" 
+                  href="https://github.com/Mann-1909" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   aria-label="GitHub"
@@ -136,7 +135,7 @@ export default function About() {
                     <Github size={24} />
                 </a>
                 <a 
-                  href="https://twitter.com" 
+                  href="https://x.com/MannSaxena35760" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   aria-label="Twitter"
@@ -145,7 +144,7 @@ export default function About() {
                     <Twitter size={24} />
                 </a>
                 <a 
-                  href="https://linkedin.com" 
+                  href="www.linkedin.com/in/mann-saxena-nitc" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   aria-label="LinkedIn"
@@ -154,7 +153,7 @@ export default function About() {
                     <Linkedin size={24} />
                 </a>
                 <a 
-                  href="mailto:hello@example.com"
+                  href="mailto:saxena.mann2005@gmail.com"
                   aria-label="Email Me"
                   className="p-3 bg-white/10 dark:bg-slate-200/50 rounded-full hover:bg-white/20 dark:hover:bg-slate-300 transition-colors backdrop-blur-sm"
                 >

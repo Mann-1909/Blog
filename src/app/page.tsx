@@ -3,6 +3,7 @@ import Navbar from "@/components/navbar";
 import Link from "next/link";
 import PostList from "@/components/postList"
 import Typewriter2 from "@/components/typewriter/typewriter2";
+import Newsletter from "@/components/newsLetter";
 // 1. Remove the old Dummy Data array
 // 2. Add this specific instruction to stop Next.js from caching old data forever
 export const revalidate = 0; 
@@ -23,7 +24,7 @@ export default async function Home() {
         {/* Hero Section (Keep this the same) */}
         <section className="mb-16 space-y-4">
           <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl text-slate-900 dark:text-white">
-            Welcome to My Blogs!🙏
+            Welcome to My Blogs!
           </h1>
           <Typewriter2 
             text="Read more about my journey, the experiences that shape me, and the new things I learn every day.
@@ -46,6 +47,7 @@ export default async function Home() {
             )}
         </section>
       </div>
+      <Newsletter />
     </main>
   );
 }

@@ -77,7 +77,7 @@ export default function Newsletter() {
   };
 
   return (
-    <div className="bg-slate-100 dark:bg-slate-900 rounded-2xl p-8 md:p-12 text-center my-20">
+    <div className="bg-slate-100 dark:bg-slate-900 rounded-tl-3xl rounded-tr-3xl p-8 md:p-12 text-center ">
       <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-4">
         Join the Digital Garden 🌱
       </h2>

@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: process.env.NEXT_PUBLIC_WEBSITE_TITLE,
-  description: "Blogs",
+  description: "Read more about my journey, the experiences that shape me, and the new things I learn every day. Step inside my digital garden.",
 };
 
 export default function RootLayout({

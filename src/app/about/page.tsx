@@ -2,8 +2,8 @@
 
 import Navbar from "@/components/navbar";
 import { motion } from "framer-motion";
-import { Code2, Dumbbell, BookOpen, MapPin, Github, Twitter, Linkedin, Mail, Link, ArrowLeft } from "lucide-react";
-
+import { Code2, Dumbbell, BookOpen, MapPin, Github, Twitter, Linkedin, Mail, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 export default function About() {
   const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
@@ -19,6 +19,9 @@ export default function About() {
       <Navbar />
         
       <main className="container mx-auto px-4 max-w-4xl py-12 md:py-20">
+        <Link href="/" className="inline-flex items-center text-slate-500 hover:text-blue-600 mb-6 transition-colors">
+            <ArrowLeft size={16} className="mr-2"/> Back to Home
+        </Link>
         {/* HERO SECTION */}
         <motion.section 
           initial="hidden" 
@@ -26,6 +29,7 @@ export default function About() {
           variants={fadeInUp} 
           className="mb-20"
         >
+          
           <h1 className="text-4xl md:text-6xl font-extrabold text-slate-900 dark:text-white mb-6 tracking-tight">
             Architecting Apps & <br />
             <span className="text-blue-600 dark:text-blue-400">Building a Better Self.</span>

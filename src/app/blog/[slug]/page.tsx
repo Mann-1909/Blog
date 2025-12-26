@@ -87,11 +87,6 @@ export default async function BlogPost({ params }: PageProps) {
             {post.content}
           </ReactMarkdown>
         </article>
-        <article className="prose prose-lg prose-slate dark:prose-invert max-w-none">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {post.content}
-          </ReactMarkdown>
-        </article>
         </ScrollProgress>
 
         {/* Add the Interaction Component here */}

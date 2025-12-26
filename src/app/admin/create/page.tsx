@@ -4,11 +4,10 @@ import { useState, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import "easymde/dist/easymde.min.css"; // Import the editor styles
+import "easymde/dist/easymde.min.css";
 import { ArrowLeft, Save, Loader2, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
 
-// Dynamically import the editor to avoid SSR issues
 const SimpleMDE = dynamic(() => import("react-simplemde-editor"), { ssr: false });
 
 export default function CreatePost() {
@@ -16,40 +15,35 @@ export default function CreatePost() {
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [category, setCategory] = useState("");
+  const [excerpt, setExcerpt] = useState(""); // <--- 1. NEW STATE
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  // Auto-generate slug from title
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setTitle(val);
-    // Simple slug generator: "Hello World" -> "hello-world"
     setSlug(val.toLowerCase().replace(/ /g, "-").replace(/[^\w-]+/g, ""));
   };
 
-  // Image Upload Handler
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setUploading(true);
     try {
-        // 1. Upload to Supabase Storage
         const fileExt = file.name.split('.').pop();
         const fileName = `${Math.random()}.${fileExt}`;
         const filePath = `blog-images/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
-            .from('images') // We need to create this bucket next!
+            .from('images')
             .upload(filePath, file);
 
         if (uploadError) throw uploadError;
 
-        // 2. Get the Public URL
         const { data } = supabase.storage.from('images').getPublicUrl(filePath);
         
-        // 3. Append markdown image syntax to content
         const imageMarkdown = `\n![Image Description](${data.publicUrl})\n`;
         setContent((prev) => prev + imageMarkdown);
         
@@ -71,15 +65,8 @@ export default function CreatePost() {
             title,
             slug,
             category,
-            // SimpleMDE returns Markdown. 
-            // We save it as HTML so our frontend (which uses 'dangerouslySetInnerHTML') can read it easily.
-            // OR: We can save Markdown and parse it on the frontend. 
-            // For simplicity now, let's use a simple markdown-to-html converter or just save raw text if we change the frontend.
-            // UPDATE: Let's save the RAW Markdown for now. 
-            // Note: You will need a markdown parser on the frontend (like 'react-markdown') if you save raw markdown.
-            // BUT, to keep your current frontend working, we should convert it.
-            // Let's use 'marked' library later. For now, let's just save the text.
-            content: content, 
+            excerpt, // <--- 2. SEND TO SUPABASE
+            content, 
             published: true,
         });
 
@@ -94,7 +81,6 @@ export default function CreatePost() {
     }
   };
 
-  // Configuration for the editor
   const mdeOptions = useMemo(() => {
     return {
       spellChecker: false,
@@ -133,9 +119,9 @@ export default function CreatePost() {
                     />
                 </div>
                 <div>
-                    <label htmlFor="title" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Slug (URL)</label>
-                    <input 
-                        id="title"
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Slug (URL)</label>
+                    <input
+                        title="URL slug for the post"
                         type="text" 
                         required
                         value={slug}
@@ -143,6 +129,19 @@ export default function CreatePost() {
                         className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-500 cursor-not-allowed outline-none"
                     />
                 </div>
+            </div>
+
+            {/* NEW EXCERPT FIELD */}
+            <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Excerpt (Short Summary)</label>
+                <textarea 
+                    required
+                    value={excerpt}
+                    onChange={(e) => setExcerpt(e.target.value)}
+                    rows={2}
+                    className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-none"
+                    placeholder="A short description that appears on the home page card..."
+                />
             </div>
 
             {/* Category & Image Uploader */}
@@ -159,14 +158,13 @@ export default function CreatePost() {
                     />
                 </div>
                 
-                {/* Image Upload Button */}
                 <div>
-                     <label className="inline-flex items-center gap-2 cursor-pointer bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-lg transition-colors w-full justify-center border border-slate-300 dark:border-slate-700">
+                      <label className="inline-flex items-center gap-2 cursor-pointer bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-lg transition-colors w-full justify-center border border-slate-300 dark:border-slate-700">
                         {uploading ? <Loader2 className="animate-spin" size={18}/> : <ImageIcon size={18}/>}
                         {uploading ? "Uploading..." : "Upload Image to Insert"}
                         <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
-                     </label>
-                     <p className="text-xs text-slate-500 mt-2 text-center">Click to upload, then it appends Markdown automatically.</p>
+                      </label>
+                      <p className="text-xs text-slate-500 mt-2 text-center">Click to upload, then it appends Markdown automatically.</p>
                 </div>
             </div>
 

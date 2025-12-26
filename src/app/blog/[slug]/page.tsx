@@ -9,6 +9,7 @@ import BlogInteraction from "@/components/blogInteraction";
 export const revalidate = 0;
 import ViewCounter from "@/components/viewCounter";
 import { Eye } from "lucide-react"; // Import Eye icon
+import ScrollProgress from "@/components/scrollProgress";
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
@@ -32,6 +33,7 @@ export default async function BlogPost({ params }: PageProps) {
       <Navbar />
 
       <main className="container mx-auto px-4 max-w-3xl mt-10">
+        <ScrollProgress>
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors mb-8"
@@ -90,6 +92,7 @@ export default async function BlogPost({ params }: PageProps) {
             {post.content}
           </ReactMarkdown>
         </article>
+        </ScrollProgress>
 
         {/* Add the Interaction Component here */}
         <BlogInteraction postId={post.id} />

@@ -5,27 +5,27 @@ import { supabase } from "@/lib/supabase";
 import { useRouter, useParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import "easymde/dist/easymde.min.css";
-import { ArrowLeft, Save, Loader2, Image as ImageIcon, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
 
-// Dynamic import for the editor
 const SimpleMDE = dynamic(() => import("react-simplemde-editor"), { ssr: false });
 
 export default function EditPost() {
   const router = useRouter();
   const params = useParams(); 
-  const id = params.id as string; // Get the ID from the URL
+  const id = params.id as string;
 
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [category, setCategory] = useState("");
+  const [excerpt, setExcerpt] = useState(""); // <--- 1. NEW STATE
   const [content, setContent] = useState("");
   
-  const [loadingData, setLoadingData] = useState(true); // Loading state for fetching
-  const [saving, setSaving] = useState(false); // Loading state for saving
+  const [loadingData, setLoadingData] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  // 1. Fetch the existing post when the page loads
+  // 1. Fetch the existing post
   useEffect(() => {
     const fetchPost = async () => {
       const { data, error } = await supabase
@@ -41,6 +41,7 @@ export default function EditPost() {
         setTitle(data.title);
         setSlug(data.slug);
         setCategory(data.category);
+        setExcerpt(data.excerpt || ""); // <--- 2. LOAD EXCERPT (handle nulls)
         setContent(data.content);
       }
       setLoadingData(false);
@@ -49,7 +50,6 @@ export default function EditPost() {
     if (id) fetchPost();
   }, [id, router]);
 
-  // Image Upload Handler (Same as Create Page)
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -77,7 +77,6 @@ export default function EditPost() {
     }
   };
 
-  // 2. Update Logic
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -85,19 +84,19 @@ export default function EditPost() {
     try {
         const { error } = await supabase
             .from("posts")
-            .update({ // <--- UPDATE instead of INSERT
+            .update({
                 title,
                 slug,
                 category,
+                excerpt, // <--- 3. SAVE EXCERPT
                 content, 
-                // We usually don't update 'created_at', but you could add an 'updated_at' column later if you want.
             })
-            .eq("id", id); // <--- WHERE id matches
+            .eq("id", id);
 
         if (error) throw error;
         
         router.push("/admin/dashboard");
-        router.refresh(); // Refresh to see changes
+        router.refresh();
 
     } catch (error: any) {
         alert("Error updating post: " + error.message);
@@ -113,7 +112,7 @@ export default function EditPost() {
       status: false,
       autosave: {
         enabled: false,
-        uniqueId: "edit_post_temp_id", // <--- Added this dummy ID to satisfy TypeScript
+        uniqueId: "edit_post_temp_id",
         delay: 1000,
       },
     };
@@ -165,6 +164,19 @@ export default function EditPost() {
                 </div>
             </div>
 
+            {/* 4. NEW EXCERPT FIELD */}
+            <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Excerpt (Short Summary)</label>
+                <textarea 
+                    required
+                    value={excerpt}
+                    onChange={(e) => setExcerpt(e.target.value)}
+                    rows={2}
+                    className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-none"
+                    placeholder="A short description that appears on the home page card..."
+                />
+            </div>
+
             {/* Category & Image Uploader */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
                 <div>
@@ -180,11 +192,11 @@ export default function EditPost() {
                 </div>
                 
                 <div>
-                     <label className="inline-flex items-center gap-2 cursor-pointer bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-lg transition-colors w-full justify-center border border-slate-300 dark:border-slate-700">
+                      <label className="inline-flex items-center gap-2 cursor-pointer bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-lg transition-colors w-full justify-center border border-slate-300 dark:border-slate-700">
                         {uploading ? <Loader2 className="animate-spin" size={18}/> : <ImageIcon size={18}/>}
                         {uploading ? "Uploading..." : "Upload Image to Insert"}
                         <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
-                     </label>
+                      </label>
                 </div>
             </div>
 

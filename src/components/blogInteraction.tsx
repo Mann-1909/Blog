@@ -1,16 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Heart, MessageCircle, Send } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Heart, MessageCircle, Send, Share2, Check } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, useInView, AnimatePresence } from "framer-motion";
 
 export default function BlogInteraction({ postId }: { postId: string }) {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   
+  const containerRef = useRef(null);
+  const isInView = useInView(containerRef, { amount: 0.3 }); 
+
   // Likes State
   const [likes, setLikes] = useState(0);
   const [hasLiked, setHasLiked] = useState(false);
@@ -20,17 +23,14 @@ export default function BlogInteraction({ postId }: { postId: string }) {
   const [newComment, setNewComment] = useState("");
   const [loadingComment, setLoadingComment] = useState(false);
 
+  // Share State
+  const [copied, setCopied] = useState(false);
+
   useEffect(() => {
-    // 1. Get current user
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
-
-    // 2. Load Likes Count
     fetchLikes();
-
-    // 3. Load Comments
     fetchComments();
     
-    // 4. Realtime Subscription (Optional: See updates instantly)
     const channel = supabase
       .channel('realtime-interactions')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'comments' }, fetchComments)
@@ -44,7 +44,6 @@ export default function BlogInteraction({ postId }: { postId: string }) {
     const { count } = await supabase.from("likes").select("*", { count: 'exact', head: true }).eq("post_id", postId);
     setLikes(count || 0);
 
-    // Check if I liked it
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
         const { data } = await supabase.from("likes").select("*").eq("post_id", postId).eq("user_id", user.id).single();
@@ -53,36 +52,32 @@ export default function BlogInteraction({ postId }: { postId: string }) {
   };
 
  const fetchComments = async () => {
-    // Select all comment fields, PLUS the linked 'profiles' data
     const { data, error } = await supabase
         .from("comments")
-        .select(`
-          *,
-          profiles (
-            full_name,
-            username,
-            avatar_url
-          )
-        `)
+        .select(`*, profiles (full_name, username, avatar_url)`)
         .eq("post_id", postId)
         .order("created_at", { ascending: true });
     
     if (error) console.error(error);
     if (data) setComments(data);
   };
+
   const handleLike = async () => {
     if (!user) return router.push("/login");
 
+    const previousLikes = likes;
+    const previousHasLiked = hasLiked;
+
     if (hasLiked) {
-        // Unlike
-        await supabase.from("likes").delete().eq("post_id", postId).eq("user_id", user.id);
         setHasLiked(false);
         setLikes(prev => prev - 1);
+        const { error } = await supabase.from("likes").delete().eq("post_id", postId).eq("user_id", user.id);
+        if(error) { setHasLiked(previousHasLiked); setLikes(previousLikes); }
     } else {
-        // Like
-        await supabase.from("likes").insert({ post_id: postId, user_id: user.id });
         setHasLiked(true);
         setLikes(prev => prev + 1);
+        const { error } = await supabase.from("likes").insert({ post_id: postId, user_id: user.id });
+         if(error) { setHasLiked(previousHasLiked); setLikes(previousLikes); }
     }
   };
 
@@ -96,22 +91,68 @@ export default function BlogInteraction({ postId }: { postId: string }) {
         post_id: postId,
         user_id: user.id,
         content: newComment,
-        email: user.email // Store email for display simply
+        email: user.email 
     });
 
     if (!error) {
         setNewComment("");
-        fetchComments(); // Refresh list
+        fetchComments();
     }
     setLoadingComment(false);
   };
 
+  // --- SMART SHARE FUNCTION ---
+  const handleShare = async () => {
+      const shareData = {
+          title: "Check out this post!", 
+          text: `I just read this amazing article on Digital Garden.`,
+          url: window.location.href,
+      };
+
+      // 1. Try Native Share (Mobile)
+      if (navigator.share) {
+          try {
+              await navigator.share(shareData);
+              return; // Stop here if successful
+          } catch (err) {
+              console.log("Error sharing or user cancelled:", err);
+          }
+      }
+
+      // 2. Fallback to Copy Link (Desktop)
+      navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
-    <div className="mt-12 border-t border-slate-200 dark:border-slate-800 pt-8">
-      {/* LIKE SECTION */}
-      <div className="flex items-center gap-6 mb-8">
+    <div ref={containerRef} className="mt-12 border-t border-slate-200 dark:border-slate-800 pt-8 relative">
+      
+      {/* FLOATING BUTTON (Just Heart) */}
+      <AnimatePresence>
+        {!isInView && (
+            <motion.div
+                initial={{ opacity: 0, scale: 0.5, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.5, y: 20 }}
+                className="fixed bottom-8 right-8 z-40"
+            >
+                <button
+                    title="like"
+                    onClick={handleLike}
+                    className="w-16 h-16 rounded-full flex items-center justify-center shadow-2xl shadow-blue-900/20 bg-gradient-to-br from-white to-slate-100 dark:from-slate-800 dark:to-slate-900 border border-slate-200 dark:border-slate-700/50 hover:scale-110 transition-transform"
+                >
+                    <Heart size={28} className={hasLiked ? "fill-pink-500 text-pink-500" : "text-slate-400 dark:text-slate-500"} />
+                </button>
+            </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* --- STATIC DOCKED ACTIONS --- */}
+      <div className="flex items-center gap-4 mb-8">
+         {/* Like Button */}
          <motion.button 
-           whileTap={{ scale: 0.8 }} // <--- Shrinks when clicked!
+           whileTap={{ scale: 0.9 }}
            onClick={handleLike}
            className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors ${
              hasLiked 
@@ -123,6 +164,18 @@ export default function BlogInteraction({ postId }: { postId: string }) {
             <span className="font-bold">{likes}</span>
             <span className="text-sm">Likes</span>
          </motion.button>
+
+         {/* Share Button (Now Smart!) */}
+         <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={handleShare}
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+         >
+            {copied ? <Check size={20} className="text-green-500" /> : <Share2 size={20} />}
+            <span className={copied ? "text-green-600 dark:text-green-400 font-medium" : ""}>
+                {copied ? "Copied!" : "Share"}
+            </span>
+         </motion.button>
       </div>
 
       {/* COMMENT SECTION */}
@@ -131,17 +184,14 @@ export default function BlogInteraction({ postId }: { postId: string }) {
          Comments ({comments.length})
       </h3>
 
-      {/* Comment List */}
       <div className="space-y-6 mb-8">
         {comments.map((comment) => {
-            // Helper to get the display name
             const profile = comment.profiles;
             const displayName = profile?.full_name || profile?.username || comment.email?.split('@')[0] || "Anonymous";
             const initial = displayName[0].toUpperCase();
 
             return (
                 <div key={comment.id} className="flex gap-3">
-                    {/* Avatar */}
                     <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0 flex items-center justify-center text-sm font-bold text-slate-500 overflow-hidden border border-slate-300 dark:border-slate-600">
                         {profile?.avatar_url ? (
                             <img src={profile.avatar_url} alt={displayName} className="w-full h-full object-cover" />
@@ -149,8 +199,6 @@ export default function BlogInteraction({ postId }: { postId: string }) {
                             initial
                         )}
                     </div>
-
-                    {/* Content */}
                     <div className="flex-1">
                         <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
                             <div className="flex justify-between items-center mb-1">
@@ -178,7 +226,6 @@ export default function BlogInteraction({ postId }: { postId: string }) {
         )}
       </div>
 
-      {/* Comment Input */}
       {user ? (
          <form onSubmit={handleComment} className="relative">
             <textarea

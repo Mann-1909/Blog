@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Heart, MessageCircle, Send, Share2, Check } from "lucide-react";
+import { Heart, MessageCircle, Send, Share2, Check, Trash2 } from "lucide-react"; // <--- Import Trash2
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -10,6 +10,7 @@ import { motion, useInView, AnimatePresence } from "framer-motion";
 export default function BlogInteraction({ postId }: { postId: string }) {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false); // <--- NEW: Track if user is admin
   
   const containerRef = useRef(null);
   const isInView = useInView(containerRef, { amount: 0.3 }); 
@@ -27,7 +28,24 @@ export default function BlogInteraction({ postId }: { postId: string }) {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    // 1. Get User AND Check if Admin
+    const checkUser = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
+
+        if (user) {
+            // Check the profile table to see if is_admin is true
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('is_admin')
+                .eq('id', user.id)
+                .single();
+            
+            setIsAdmin(profile?.is_admin || false);
+        }
+    };
+
+    checkUser();
     fetchLikes();
     fetchComments();
     
@@ -101,6 +119,20 @@ export default function BlogInteraction({ postId }: { postId: string }) {
     setLoadingComment(false);
   };
 
+  // --- NEW: DELETE FUNCTION ---
+  const handleDeleteComment = async (commentId: string) => {
+      const confirmDelete = window.confirm("Are you sure you want to delete this comment?");
+      if (!confirmDelete) return;
+
+      const { error } = await supabase.from('comments').delete().eq('id', commentId);
+
+      if (error) {
+          alert("Error deleting: " + error.message);
+      } else {
+          fetchComments(); // Refresh list immediately
+      }
+  };
+
   // --- SMART SHARE FUNCTION ---
   const handleShare = async () => {
       const shareData = {
@@ -109,17 +141,15 @@ export default function BlogInteraction({ postId }: { postId: string }) {
           url: window.location.href,
       };
 
-      // 1. Try Native Share (Mobile)
       if (navigator.share) {
           try {
               await navigator.share(shareData);
-              return; // Stop here if successful
+              return; 
           } catch (err) {
               console.log("Error sharing or user cancelled:", err);
           }
       }
 
-      // 2. Fallback to Copy Link (Desktop)
       navigator.clipboard.writeText(window.location.href);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -165,7 +195,7 @@ export default function BlogInteraction({ postId }: { postId: string }) {
             <span className="text-sm">Likes</span>
          </motion.button>
 
-         {/* Share Button (Now Smart!) */}
+         {/* Share Button */}
          <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={handleShare}
@@ -189,9 +219,12 @@ export default function BlogInteraction({ postId }: { postId: string }) {
             const profile = comment.profiles;
             const displayName = profile?.full_name || profile?.username || comment.email?.split('@')[0] || "Anonymous";
             const initial = displayName[0].toUpperCase();
+            
+            // Check if user is the author OR if user is Admin
+            const canDelete = (user && user.id === comment.user_id) || isAdmin;
 
             return (
-                <div key={comment.id} className="flex gap-3">
+                <div key={comment.id} className="flex gap-3 group"> {/* Added group class for hover effect */}
                     <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0 flex items-center justify-center text-sm font-bold text-slate-500 overflow-hidden border border-slate-300 dark:border-slate-600">
                         {profile?.avatar_url ? (
                             <img src={profile.avatar_url} alt={displayName} className="w-full h-full object-cover" />
@@ -200,7 +233,7 @@ export default function BlogInteraction({ postId }: { postId: string }) {
                         )}
                     </div>
                     <div className="flex-1">
-                        <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
+                        <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border border-slate-100 dark:border-slate-800 relative">
                             <div className="flex justify-between items-center mb-1">
                                 <div className="flex items-center gap-2">
                                     <span className="text-sm font-bold text-slate-900 dark:text-white">
@@ -210,9 +243,22 @@ export default function BlogInteraction({ postId }: { postId: string }) {
                                         <span className="text-xs text-slate-400">@{profile.username}</span>
                                     )}
                                 </div>
-                                <span className="text-xs text-slate-400">
-                                    {new Date(comment.created_at).toLocaleDateString()}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-xs text-slate-400">
+                                        {new Date(comment.created_at).toLocaleDateString()}
+                                    </span>
+                                    
+                                    {/* --- DELETE BUTTON (Only shows if canDelete is true) --- */}
+                                    {canDelete && (
+                                        <button 
+                                            onClick={() => handleDeleteComment(comment.id)}
+                                            className="text-slate-400 hover:text-red-500 transition-colors p-1"
+                                            title="Delete Comment"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                             <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">{comment.content}</p>
                         </div>

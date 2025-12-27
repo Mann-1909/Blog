@@ -15,7 +15,6 @@ export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
-
   useEffect(() => {
     setMounted(true);
     supabase.auth.getUser().then(({ data: { user } }) => {

@@ -2,7 +2,7 @@
 
 import Navbar from "@/components/navbar";
 import { motion } from "framer-motion";
-import { Code2, Dumbbell, BookOpen, MapPin, Github, Twitter, Linkedin, Mail, ArrowLeft } from "lucide-react";
+import { Code2, Dumbbell, BookOpen, MapPin, Github, Twitter, Linkedin, Mail, ArrowLeft, InstagramIcon, Instagram } from "lucide-react";
 import Link from "next/link";
 export default function About() {
   const fadeInUp = {
@@ -128,7 +128,7 @@ export default function About() {
               I'm always open to discussing new projects, creative ideas, or opportunities to be part of your visions.
             </p>
             
-            <div className="flex justify-center gap-6">
+            <div className="flex flex-wrap justify-center gap-6">
                 <a 
                   href="https://github.com/Mann-1909" 
                   target="_blank" 
@@ -156,6 +156,16 @@ export default function About() {
                 >
                     <Linkedin size={24} />
                 </a>
+                <a 
+                  href="https://www.instagram.com/saxena.mann2005/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                  className="p-3 bg-white/10 dark:bg-slate-200/50 rounded-full hover:bg-white/20 dark:hover:bg-slate-300 transition-colors backdrop-blur-sm"
+                >
+                    <Instagram size={24} />
+                </a>
+                
                 <a 
                   href="mailto:saxena.mann2005@gmail.com"
                   aria-label="Email Me"

@@ -234,7 +234,7 @@ export default function BlogInteraction({ postId }: { postId: string }) {
                     </div>
                     <div className="flex-1">
                         <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border border-slate-100 dark:border-slate-800 relative">
-                            <div className="flex justify-between items-center mb-1">
+                            <div className="flex justify-between items-center ga mb-1">
                                 <div className="flex items-center gap-2">
                                     <span className="text-sm font-bold text-slate-900 dark:text-white">
                                         {displayName}
@@ -245,7 +245,7 @@ export default function BlogInteraction({ postId }: { postId: string }) {
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <span className="text-xs text-slate-400">
-                                        {new Date(comment.created_at).toLocaleDateString()}
+                                        {new Date(comment.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })+"  "+new Date(comment.created_at).toLocaleDateString()}
                                     </span>
                                     
                                     {/* --- DELETE BUTTON (Only shows if canDelete is true) --- */}

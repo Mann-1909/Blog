@@ -17,11 +17,12 @@ export default function Newsletter() {
 
     const initUser = async () => {
       try {
-        // 1. Get Session Immediately
-        const { data: { session } } = await supabase.auth.getSession();
+        // FIX: Use getUser() instead of getSession(). 
+        // getUser() is safer and ensures the user is actually valid/logged in on load.
+        const { data: { user } } = await supabase.auth.getUser();
         
-        if (mounted && session?.user?.email) {
-          setEmail(session.user.email);
+        if (mounted && user?.email) {
+          setEmail(user.email);
           setIsLoggedIn(true);
         }
       } catch (error) {
@@ -37,11 +38,11 @@ export default function Newsletter() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!mounted) return;
 
-      // Only update if we definitively have a session or explicitly signed out
       if (session?.user?.email) {
         setEmail(session.user.email);
         setIsLoggedIn(true);
-        setIsLoadingUser(false);
+        // Ensure loading stops if the event fires after init
+        setIsLoadingUser(false); 
       } else if (event === "SIGNED_OUT") {
         setIsLoggedIn(false);
         setEmail("");
@@ -100,7 +101,6 @@ export default function Newsletter() {
                 value={isLoadingUser ? "Checking..." : email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                // Lock input if logged in OR if we are still checking
                 disabled={isLoggedIn || isLoadingUser} 
                 className={`w-full px-4 py-3 rounded-xl border outline-none transition-all ${
                     isLoggedIn || isLoadingUser
@@ -108,7 +108,7 @@ export default function Newsletter() {
                     : "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500"
                 }`}
               />
-              {isLoggedIn && (
+              {isLoggedIn && !isLoadingUser && (
                   <span className="hidden sm:inline absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-500 bg-slate-200 dark:bg-slate-800 pl-2">
                       (Logged in)
                   </span>

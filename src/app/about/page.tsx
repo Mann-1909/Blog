@@ -148,7 +148,7 @@ export default function About() {
                     <Twitter size={24} />
                 </a>
                 <a 
-                  href="www.linkedin.com/in/mann-saxena-nitc" 
+                  href="https://www.linkedin.com/in/mann-saxena-nitc" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   aria-label="LinkedIn"
@@ -157,7 +157,7 @@ export default function About() {
                     <Linkedin size={24} />
                 </a>
                 <a 
-                  href="https://www.instagram.com/saxena.mann2005/" 
+                  href="https://www.instagram.com/ackermann_____" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   aria-label="Instagram"

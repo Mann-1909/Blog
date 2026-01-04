@@ -3,12 +3,12 @@ import Navbar from "@/components/navbar";
 import Link from "next/link";
 import { ArrowLeft, Clock } from "lucide-react";
 import { notFound } from "next/navigation";
-import ReactMarkdown from "react-markdown"; // <--- Import this
-import remarkGfm from "remark-gfm"; // <--- Import this (adds support for tables, strikethrough, etc)
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import BlogInteraction from "@/components/blogInteraction";
 export const revalidate = 0;
 import ViewCounter from "@/components/viewCounter";
-import { Eye } from "lucide-react"; // Import Eye icon
+import { Eye } from "lucide-react";
 import ScrollProgress from "@/components/scrollProgress";
 import { calculateReadingTime } from "@/lib/utils";
 interface PageProps {
@@ -34,7 +34,7 @@ export default async function BlogPost({ params }: PageProps) {
     <div className="min-h-screen bg-white dark:bg-slate-950 pb-20">
       <Navbar />
 
-      <main className="container mx-auto px-4 max-w-4xl mt-10">
+      <main className="container mx-auto px-4 max-w-3xl mt-10">
         <ScrollProgress>
           <Link
             href="/"

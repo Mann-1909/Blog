@@ -126,7 +126,7 @@ export default function BlogInteraction({ postId }: { postId: string }) {
 
   const handleShare = async () => {
       const url = window.location.href;
-      const shareData = { title: "Check out this post!", text: `Read this on Digital Garden.`, url: url };
+      const shareData = { title: "Check out this post!", text: `Read my Blogs`, url: url };
       if (navigator.share) {
           try { await navigator.share(shareData); return; } catch (err) {}
       }

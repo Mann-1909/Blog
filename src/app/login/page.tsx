@@ -11,7 +11,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false); // Toggle between Login and Sign Up
+  const [isSignUp, setIsSignUp] = useState(false); 
   const [message, setMessage] = useState("");
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -21,6 +21,7 @@ export default function LoginPage() {
 
     try {
         let result;
+        
         if (isSignUp) {
             result = await supabase.auth.signUp({ email, password });
         } else {
@@ -29,11 +30,20 @@ export default function LoginPage() {
 
         if (result.error) throw result.error;
 
-        if (isSignUp) {
-            setMessage("Check your email for the confirmation link!");
-        } else {
-            router.back(); // Go back to the blog post they were reading
+        // --- THE FIX IS HERE ---
+        // Check if we got a session back. 
+        // If yes, we are logged in (Confirm Email is OFF).
+        if (result.data?.session) {
+            router.push("/"); // Redirect to home
+            router.refresh(); // Refresh to update Navbar state
+            return; 
         }
+
+        // If no session but no error, THEN it means email confirmation is required
+        if (isSignUp && !result.data?.session) {
+            setMessage("Check your email for the confirmation link!");
+        }
+
     } catch (error: any) {
         setMessage(error.message);
     } finally {
@@ -81,7 +91,10 @@ export default function LoginPage() {
 
             <div className="mt-6 text-center text-sm">
                 <button 
-                    onClick={() => setIsSignUp(!isSignUp)}
+                    onClick={() => {
+                        setIsSignUp(!isSignUp);
+                        setMessage(""); // Clear message when toggling
+                    }}
                     className="text-slate-500 hover:text-blue-600 underline"
                 >
                     {isSignUp ? "Already have an account? Log In" : "Need an account? Sign Up"}

@@ -11,6 +11,8 @@ import ViewCounter from "@/components/viewCounter";
 import { Eye } from "lucide-react";
 import ScrollProgress from "@/components/scrollProgress";
 import { calculateReadingTime } from "@/lib/utils";
+import rehypeRaw from "rehype-raw";
+import rehypeHighlight from "rehype-highlight";
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
@@ -79,13 +81,16 @@ export default async function BlogPost({ params }: PageProps) {
           */}
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeHighlight, rehypeRaw]} // <--- 2. ADD IT HERE
               components={{
                 // Optional: Custom styling for specific elements if needed
                 img: ({ node, ...props }) => (
                   <img
-                    {...props}
-                    className="rounded-xl border border-slate-200 dark:border-slate-800 my-8 w-full"
-                  />
+        {...props}
+        // CHANGED: mx-auto centers it, block allows margins to work, 
+        // max-w-full keeps it responsive but allows specific widths.
+        className="rounded-xl border border-slate-200 dark:border-slate-800 my-8 mx-auto block max-w-full h-auto shadow-lg" 
+      />
                 ),
               }}
             >

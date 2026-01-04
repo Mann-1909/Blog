@@ -167,7 +167,7 @@ export default function About() {
                 </a>
                 
                 <a 
-                  href="mailto:saxena.mann2005@gmail.com"
+                  href="mailto:saxena.sukuna2005@gmail.com"
                   aria-label="Email Me"
                   className="p-3 bg-white/10 dark:bg-slate-200/50 rounded-full hover:bg-white/20 dark:hover:bg-slate-300 transition-colors backdrop-blur-sm"
                 >
